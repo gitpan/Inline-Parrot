@@ -10,7 +10,7 @@ use constant SELECT_TIMEOUT => 0.05;
 use vars qw( $parrot_interpreter_bin );
 
 # --- The following line is edited by the Makefile.PL script
-$parrot_interpreter_bin = 'parrot'; # _EDITLINE_MARKER_
+$parrot_interpreter_bin = '/home/fglock/temp/parrot-0.1.1/parrot'; # _EDITLINE_MARKER_
 
 # --- TODO
 #
@@ -325,7 +325,7 @@ The default C<parrot_file_name> is determined at installation time by C<Makefile
 
 Compiles the code, and leave the result in the Parrot process memory.
 
-Returns a status string and an error string:
+Returns a status string (the string format definition is not stable).
 
   my $status = $parrot->compile( $code );
 
@@ -333,20 +333,13 @@ Returns a status string and an error string:
 
 Compiles the code, and leave the result in the Parrot process memory.
 
-Returns a status string and an error string:
+Returns a status string (the string format definition is not stable).
 
   my $status = $parrot->compile_and_run( $code );
 
-Under Windows, $error is always an empty string.
-
-The first subroutine in the code is called using the sequence:
-
-  find_global P0, "_subroutine_name"
-  invokecc
-
-Subroutines should return using the code:
-
-  invoke P1
+The first subroutine in the code is called.
+Perl parameters are passed as specified in the Parrot Calling Conventions:
+L<http://www.parrotcode.org/docs/pdd/pdd03_calling_conventions.html>
 
 * open
 

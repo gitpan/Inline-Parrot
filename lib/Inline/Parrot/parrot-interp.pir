@@ -164,27 +164,27 @@ L3:
     # return integers
 
     unless I1, INT_END
-    .print_int( S5 )
+    .print_int( I5 )
     unless I1, INT_END
-    .print_int( S6 )
+    .print_int( I6 )
     unless I1, INT_END
-    .print_int( S7 )
+    .print_int( I7 )
     unless I1, INT_END
-    .print_int( S8 )
+    .print_int( I8 )
     unless I1, INT_END
-    .print_int( S9 )
+    .print_int( I9 )
     unless I1, INT_END
-    .print_int( S10 )
+    .print_int( I10 )
     unless I1, INT_END
-    .print_int( S11 )
+    .print_int( I11 )
     unless I1, INT_END
-    .print_int( S12 )
+    .print_int( I12 )
     unless I1, INT_END
-    .print_int( S13 )
+    .print_int( I13 )
     unless I1, INT_END
-    .print_int( S14 )
+    .print_int( I14 )
     unless I1, INT_END
-    .print_int( S15 )
+    .print_int( I15 )
 
 INT_END:
 

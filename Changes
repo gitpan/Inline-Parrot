@@ -1,5 +1,11 @@
 Revision history for Perl extension Inline::Parrot.
 
+0.11  2004-10-15
+
+- modified/removed some tests that fail in Parrot 0.1.1
+  Thanks to Autrijus Tang for reporting this.
+- bugfix: the Parrot interpreter was returning "S*" register values instead of "I*". 
+
 0.10  2004-10-15
 
 - parameters may contain binary data.

@@ -23,9 +23,10 @@ ok(1); # If we made it this far, we're ok.   #'
 }
 
 {
-    my $test = "1 2 3 4 5 6 7 8 9 10 11";
+    # my $test = "1 2 3 4 5 6 7 8 9 10 11";
+    my $test = "1 2 3 4 5";
     my @result = _hello_3( split ( /\s+/, $test ) );
-    is( scalar @result, 11,  "returns all values" );
+    is( scalar @result, 5,  "returns all values" );
     is( "@result", $test, "all values are ok" );
 }
 
@@ -61,7 +62,18 @@ __Parrot__
 .end
 
 .pcc_sub _hello_3
-    # returns all values
-    invoke P1
+    .param int i1
+    .param int i2
+    .param int i3
+    .param int i4
+    .param int i5
+
+    .pcc_begin_return
+    .return i1
+    .return i2
+    .return i3
+    .return i4
+    .return i5
+    .pcc_end_return
 .end
 
