@@ -13,7 +13,7 @@ use vars qw( $VERSION @ISA $parrot );
 
 BEGIN {
     # warn "beginning\n";
-    $VERSION = '0.08';
+    $VERSION = '0.0801';
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
         # parrot_interpreter_file_name => 'parrot-interp.pir',
@@ -307,11 +307,13 @@ The Inline::Parrot module allows you to put Parrot source code directly
 
 =head1 CALLING CONVENTIONS
 
-Perl parameters are passed on a C<.PerlArray> in C<P5>.
+Perl parameters are passed as specified in the Parrot Calling Conventions.
+
+L<http://www.parrotcode.org/docs/pdd/pdd03_calling_conventions.html>
 
 =head1 GLOBAL VARIABLES
 
-* $Inline::Parrot::parrot
+* C<$Inline::Parrot::parrot>
 
 The Parrot interpreter object. 
 

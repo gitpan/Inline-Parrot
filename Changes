@@ -1,5 +1,9 @@
 Revision history for Perl extension Inline::Parrot.
 
+0.0801
+
+- updated CALLING CONVENTIONS section
+
 0.08  2004-10-13
 
 - Makefile.PL asks for the location of "parrot"
