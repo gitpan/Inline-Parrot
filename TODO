@@ -1,51 +1,33 @@
 TODO list for Perl extension Inline::Parrot.
 
-- include features from version 0.09
-- added a global $DEBUG flag to Inline::Parrot.
-- Windows can report Parrot errors (STDOUT and STDERR are the same handle)
-- updated Inline::Parrot::parrot API docs
-- Parrot error messages always go through Perl to STDERR
+- add tests for the preprocessor: '.include' and '.macro' statements
+- does Parrot know about 'wantarray' ?
 
-- returned int/float are not being formatted
-
-- how to create a signature for the return values?
-- returned values are currently unordered
-- subs without signature should use PMC, instead of string
-- use "freeze/thaw", Data::Dumper, or Storable
-
-- process .include
-
-- mixing I::Parrot with Inline::C
-- XS version of I::Parrot
+- Test mixing I::Parrot with Inline::C
+  XS version of I::Parrot ?
 
 - use other pipes instead of STDIN/STDOUT/STDERR
 - set up an exception handler to get the error messages into STDOUT
 - Test what happens if STDIN is read by Parrot
+- "Division by zero" error is not showing up
 
 - The parrot subroutines should be created under the same namespace as 
-the current Perl module
+  the current Perl module
 - Test Parrot global variables
 - Test for namespace problems
-
-- Pass parameters to Parrot 
-- see pdd03 - calling conventions
-- see imcc/t/imcpasm/pcc.t
+- Test for Parrot calling subroutines in different code snippets.
 
 - test for different encodings
-- parameters are passed on P5 through P15, and then in P3 as a 
-.PerlArray (simple values only)
-- process overflow parameters / return values
-- prototypes
-- test non-prototyped parameters /return values
+- test prototyped/non-prototyped parameters/return values
+- allow "undef" parameters
 - it doesn't pass data structures back and forth.
-- you can't pass a data structure by reference - this is not 
-likely to be fixable, because the perl and the parrot processes
-don't share memory. But this can be emulated (slow).
-
-- Documentation
+  you can't pass a data structure by reference - this is not 
+  likely to be fixable, because the perl and the parrot processes
+  don't share memory. But this can be emulated (slow).
+- parse the signature for the return values
+  returned values are currently unordered
+- use "freeze/thaw", Data::Dumper, or Storable to pass structures
 
 - Test what happens with Perl when Parrot sleep's, and vice-versa
 - Perl may give Parrot a timeout, if Parrot make a sleep.
-
 - Test with Perl threads; Parrot threads
-

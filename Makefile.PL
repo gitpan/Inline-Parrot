@@ -5,56 +5,56 @@ use ExtUtils::MakeMaker;
 
 # some code from Inline::Octave
 
-my $octave;
+my $parrot;
 # check if Parrot interpreter was specified on cmd line
 foreach (@ARGV) {
    if (/^PARROT=(.+)/) {
-      $octave= $1;
+      $parrot= $1;
       $_= "";
    }
 }   
 
-unless ( defined $octave )
+unless ( defined $parrot )
 {
     # retrieve current configuration
     eval " use Inline::Parrot::parrot; ";
-    $octave = $Inline::Parrot::parrot::parrot_interpreter_bin || "parrot";
+    $parrot = $Inline::Parrot::parrot::parrot_interpreter_bin || "parrot";
     # clear "used only once" warning
     $Inline::Parrot::parrot::parrot_interpreter_bin =
         $Inline::Parrot::parrot::parrot_interpreter_bin;
 
-    my $version = `$octave -V`;
-    my $octave_validated = 1 
+    my $version = `$parrot -V`;
+    my $parrot_validated = 1 
         if $version && $version =~ /parrot version (\d+\.\d+\.\d+)/is;
-    my $octave_version = $1;
+    my $parrot_version = $1;
 
-    if ($octave_validated) {
-        print "Found parrot: [$octave] (version $octave_version)\n";
-        $octave = prompt ( "Please enter new path to Parrot executable " .
-                      "or <RETURN> to accept:", $octave );
+    if ($parrot_validated) {
+        print "Found parrot: [$parrot] (version $parrot_version)\n";
+        $parrot = prompt ( "Please enter new path to Parrot executable " .
+                      "or <RETURN> to accept:", $parrot );
     }
     else 
     {
-        print "Unable to find parrot at: [$octave]\n";
-        $octave = prompt ( "Please enter new path to Parrot executable:" );
+        print "Unable to find parrot at: [$parrot]\n";
+        $parrot = prompt ( "Please enter new path to Parrot executable:" );
     }
 }
 
    print "\nFixing module parrot.pm for parrot path...\n" ;
-   open(OCTAVE, "<lib/Inline/Parrot/parrot.pm") 
+   open(PARROT, "<lib/Inline/Parrot/parrot.pm") 
        or die "Can't open parrot.pm for reading" ;
-   my @lines = <OCTAVE> ;
-   close(OCTAVE) ;
+   my @lines = <PARROT> ;
+   close(PARROT) ;
 
-   open(OCTAVE, ">lib/Inline/Parrot/parrot.pm") 
+   open(PARROT, ">lib/Inline/Parrot/parrot.pm") 
        or die "Can't open parrot.pm for writing" ;
    foreach my $line (@lines) {
       $line =~ 
          s{(\$parrot_interpreter_bin\s*=\s*)'.+?'(;\s*#\s*_EDITLINE_MARKER_)}
-          {$1\'$octave\'$2};
-      print OCTAVE $line ;
+          {$1\'$parrot\'$2};
+      print PARROT $line ;
    }
-   close(OCTAVE) ;
+   close(PARROT) ;
 
 
 WriteMakefile(
@@ -62,5 +62,5 @@ WriteMakefile(
     VERSION_FROM      => 'lib/Inline/Parrot.pm',
     PREREQ_PM         => { 'Inline' => 0 }, 
     ABSTRACT_FROM     => 'lib/Inline/Parrot.pm', 
-    AUTHOR            => 'Flavio S. Glock <fglock@>',
+    AUTHOR            => 'Flavio S. Glock <fglock@cpan.org>',
 );

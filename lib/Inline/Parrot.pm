@@ -8,17 +8,20 @@ require Inline;
 use Carp;
 use File::Spec;
 
-use vars qw( $VERSION @ISA $parrot );
+use vars qw( $VERSION @ISA $parrot $DEBUG );
 @ISA = qw( Inline );
 
 BEGIN {
-    $VERSION = '0.1101';
+    $VERSION = '0.12';
+    $DEBUG = 0;
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
         # parrot_interpreter_file_name => 'parrot-interp.pir',
         parrot_options => [],
         debug => 0,
     );
+    print __PACKAGE__ . "::DEBUG is on.\n"
+        if $DEBUG;
 }
 
 sub register {
@@ -49,14 +52,11 @@ sub build {
     my $obj = $o->{API}{location};
     $o->mkpath($path) unless -d $path;
 
-    # my Parrot interpreter doesn't like blank lines
-    $code =~ s/^\n/ \n/sg;
-    $code =~ s/\n\n/\n \n/sg;
+    print "saving preprocessed code snippet [ $code ] into file [ $obj ] \n"
+        if $DEBUG;
 
-    # warn "saving code [ $code ] into file [ $obj ] \n";
-
-    open PARROT_OBJ, "> $obj"
-      or croak "Can't open $obj for output\n$!";
+    open PARROT_OBJ, "|-", $parrot->{parrot_file_name} . " -E  - > $obj"
+        or croak "Can't open Parrot preprocessor for file $obj\n$!";
     print PARROT_OBJ $code;
     close \*PARROT_OBJ;
 }
@@ -101,9 +101,18 @@ sub load {
     }
     
     # send the code to the Parrot compiler
-    my ( $status, $error ) = $parrot->compile( join '' => @code );
+    my $status = $parrot->compile( join '' => @code );
     
-    # print "Compiled $sub_name status: $status -- $error \n";
+    print "parrot compiler returned status: \n$status --\n" 
+        if $DEBUG;
+
+    unless ( $status =~ m/\n\$\$ret\$\$\n/ )
+    {
+        my ( $error ) = $status =~ m/\$\$start\$\$\n(.*)/s;
+        warn "Error compiling Parrot, near subroutine \"$sub_name\" ".
+             " in package $package: $error\n";
+    }
+ 
     my $inline_package = __PACKAGE__;
     
     for my $sub_name ( @sub_name )
@@ -112,11 +121,13 @@ sub load {
 
 package '.$package.' ;
 sub     '.$sub_name.'      {
-    # warn "start parrot sub '.$sub_name.' \n";
+    print "start parrot sub '.$sub_name.' \n"
+        if $Inline::Parrot::DEBUG;
 
     my ( $param, $value ) = '.$inline_package.'::_setup_parrot_parameters( "'.$sub_name.'", @_ );
 
     my $cmd =
+        "_start_sub_'.$sub_name.'\n" .
         ".pcc_sub _start_sub_'.$sub_name.'\n" .
         "  \$P1 = P1\n" .
 
@@ -133,9 +144,17 @@ sub     '.$sub_name.'      {
         ".end\n" ;
 
     # print "cmd [ \n$cmd ] \n";
-    my ( $status, $error ) = $Inline::Parrot::parrot->compile_and_run( $cmd, $value );
+    my $status = $Inline::Parrot::parrot->compile_and_run( $cmd, $value );
 
-    # print "parrot returned status [ $status -- $error ]\n";
+    print "parrot returned status: \n$status --\n" 
+        if $Inline::Parrot::DEBUG;
+
+    unless ( $status =~ m/\n\$\$ret\$\$\n/ )
+    {
+        my ( $error ) = $status =~ m/\$\$start\$\$\n(.*)/s;
+        warn "Runtime error calling Parrot subroutine \"'.$sub_name.'\" ".
+             "in package '.$package.': $error\n";
+    }
 
     my ( $stdout, $return ) = $status =~ 
         m/\$\$start\$\$\n(.*)\n\$\$ret\$\$\n(.*)\$\$end\$\$/s;
@@ -155,27 +174,22 @@ sub     '.$sub_name.'      {
     # XXX
 
     my @ret;
-
     while ( @return )
     {
-
-    my $strlen = shift @return;
-    my $str;
-    $str = shift @return;
-    while ( length( $str ) < $strlen )
-    {
-        $str .= "\n";
-        #last unless @return;
-        #next unless length( $str ) < $strlen ;
-        my $s = shift @return;
-        $str .= $s if defined $s;
+        my $strlen = shift @return;
+        my $str;
+        $str = shift @return;
+        while ( length( $str ) < $strlen )
+        {
+            $str .= "\n";
+            #last unless @return;
+            #next unless length( $str ) < $strlen ;
+            my $s = shift @return;
+            $str .= $s if defined $s;
+        }
+        push @ret, $str;
     }
-    push @ret, $str;
-
-    }
-
     @return = @ret;
-
     # print "Return list: @return \n";
     # warn "end parrot sub '.$sub_name.' \n";
     return $return[0] unless $#return;
@@ -208,7 +222,7 @@ sub _setup_parrot_parameters {
     #        print "    $param->{name} is $param->{type} \n";
     #    }
 
-    # TODO: add code for accepting arrays, hashes, references, callbacks
+    # TODO: add code for accepting arrays, hashes, references, callbacks, undef
     
     my $param = "";
     my $value = "";
@@ -336,10 +350,21 @@ The Inline::Parrot module allows you to insert Parrot source code directly
 Perl parameters are passed as specified in the Parrot Calling Conventions:
 L<http://www.parrotcode.org/docs/pdd/pdd03_calling_conventions.html>
 
-=head2 GLOBAL VARIABLES
+=head2 Global variables
 
 C<$Inline::Parrot::parrot> - A Parrot interpreter object. 
 See L<Inline::Parrot::parrot> for the available methods.
+
+=head2 Release notes
+
+The current version does not work with arrays, hashes, references, and special values such as C<undef>.
+All parameters passed between Perl and Parrot are stringified scalars.
+
+If you modify an included file, this change may not be noticed by C<Inline::Parrot>.
+That's because C<.include> statements are evaluated only when the main Parrot code changes.
+
+The Parrot code should not try to read from C<STDIN>.
+The C<STDIN> handle is currently used internally by the Parrot interpreter.
 
 =head1 SEE ALSO
 

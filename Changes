@@ -1,5 +1,27 @@
 Revision history for Perl extension Inline::Parrot.
 
+0.12  2004-11-08
+
+- added "Release notes" section.
+- preprocess '.include' and '.macro' statements during the 'build' phase.
+- changed internal calling sequence for $parrot object, avoids extra parsing.
+
+0.1103  2004-11-07
+
+- unlimited parameters and returned values; use the overflow register
+
+0.1102  2004-11-06
+
+- added a "Build.PL"
+- added a global $DEBUG flag to Inline::Parrot.
+- t/03-crash-parrot.t uses default "parrot" location
+- if Parrot crashes, it should now give proper error messages to STDERR
+- Windows can now report Parrot errors (STDOUT and STDERR are the same handle)
+- updated Inline::Parrot::parrot API docs
+- refactored "parrot-interp.pir" macros
+- returned parameters can be non-prototyped
+- parrot-interp.pir POD
+
 0.1101  2004-10-28
 
 - use prompt() in Makefile.PL

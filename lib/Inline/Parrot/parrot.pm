@@ -67,7 +67,6 @@ $parrot_interpreter_bin = 'parrot'; # _EDITLINE_MARKER_
 sub get_interpreter_code {
     my $path  = $INC{"Inline/Parrot/parrot.pm"};
     $path =~ s/parrot.pm/parrot-interp.pir/;
-    # print "Path: $path \n";
     return $path;
 }
 
@@ -75,19 +74,14 @@ sub open {
     my $self = shift;
     warn ref($self) . "->open\n" if $self->{debug};
     return if $self->{is_open};
-    # my $pipe = "";
-    # $pipe = '2>error.log'   # '2>&1' 
-    #    if $^O =~ /win/i; 
     my $cmd = join ( ' ', 
         $self->{parrot_file_name},
         @{ $self->{parrot_options} },
         $self->{parrot_interpreter_file_name},
-	# $pipe,
     ); 
     warn "    Command line: $cmd\n" if $self->{debug};
     $self->{write_fh} = new IO::File;
     $self->{read_fh}  = new IO::File;
-    # $self->{error_fh} = new IO::File;
     $self->{parrot_pid} = IPC::Open3::open3(
         $self->{write_fh}, 
         $self->{read_fh}, 
@@ -96,18 +90,11 @@ sub open {
         $self->{parrot_file_name},
         @{ $self->{parrot_options} },
         $self->{parrot_interpreter_file_name},
-	# $pipe
     );
     unless ($self->{parrot_pid}) {
         die "can't fork: $!";
     }
     warn "pid ".$self->{parrot_pid} if $self->{debug};
-    # local $SIG{PIPE} = sub { 1 };    
-
-    #$self->{write_fh}->autoflush;
-    #$self->{read_fh}->autoflush;
-    #$self->{error_fh}->autoflush;
-
     $self->{is_open} = 1;
     return $self;
 }
@@ -124,11 +111,12 @@ sub compile {
     my $code = shift;
     warn ref($self) . "->compile\n" if $self->{debug};
 
-    my $header = '.pcc_sub _just__compile__'   . "\n" . 
-                 '  print "$$compile$$\n"' . "\n" . 
-                 # '  .pcc_begin_return'     . "\n" .
-                 # '  .pcc_end_return'       . "\n" .
-                 '.end'                    . "\n" ;
+    my $header = '_just__compile__'          . "\n" . 
+                 '.pcc_sub _just__compile__' . "\n" . 
+                 '  print "$$compile$$\n"'   . "\n" . 
+                 '  .pcc_begin_return'       . "\n" .
+                 '  .pcc_end_return'         . "\n" .
+                 '.end'                      . "\n" ;
 
     return $self->compile_and_run( $header . $code );
 }
@@ -138,76 +126,58 @@ sub compile_and_run {
     my $code = shift;
     my $data = shift;
     warn ref($self) . "->compile_and_run\n" if $self->{debug};
-
-    # print STDERR "Is open? " . $self->{is_open} . "\n";
-
     die "parrot is not running" 
         unless $self->{is_open};
 
-    my $header = '.sub _return__compile__status__' . int(rand(10000)) . '
-            print "$$compile$$\n"
-            end' . "\n" . 
-            '.end' . "\n" ;
-    # $code = $header; # . $code;
-
     $code =~ s/^\n+//sg;
-    $code =~ s/\n\n/\n/sg;
+    # my Parrot interpreter doesn't like blank lines
+    $code =~ s/\n(?=\n)/\n /g;
 
-    my @header = split( /\s+/, $code );
-    my $sub_name = $header[1];
+    #my @header = split( /\s+/, $code );
+    #my $sub_name = $header[1];
 
-    warn "Sub name $sub_name\n" if $self->{debug};
-    $code = $sub_name . "\n" . $code;
+    #warn "Sub name $sub_name\n" if $self->{debug};
+    #$code = $sub_name . "\n" . $code;
 
     $code = $code . "\n" unless $code =~ m/\n$/s;
     $code = $code . "\n";
-    warn "--- Invoke-start ---\n" . ${code} . "---- Invoke-end ----\n" if $self->{debug};
 
-    # die "Parrot process was closed" 
-    #    unless $self->{write_fh}->opened &&
-    #           $self->{read_fh}->opened &&
-    #           $self->{error_fh}->opened;
+    if ( $self->{debug} )
+    {
+        my $c = $code;
+        # $c =~ s/\n/]\n/sg;
+        warn "--- Invoke-start ---\n" . $c . "---- Invoke-end ----\n";
+    }
 
     $self->{write_fh}->print( $code ) 
         or die "can't talk to Parrot process: $@";
 
     if ( defined $data )
     {
-    $self->{write_fh}->print( $data ) 
-        or die "can't talk to Parrot process: $@";
+        $self->{write_fh}->print( $data ) 
+            or die "can't talk to Parrot process: $@";
     }
 
     $self->{read_fh}->blocking(0);
-    #$self->{error_fh}->blocking(0);
-    
-    #$self->{write_fh}->close;
-
     my $read = "";
-    # my $error = "";
     my $retry = 10;
     my $r = "";
-    # my $e = "";
     my $start_count = 0;
     while( $retry-- ) {
         $r = $self->{read_fh}->getline || "";
         # print "[$r]";
         $start_count++ if $r =~ m/\$\$start\$\$/s;
         last if $start_count > 2;
-        # $e = $self->{error_fh}->getline || ""
-        #    unless $^O =~ /win/i; # blocks I/O
         select ( undef, undef, undef, SELECT_TIMEOUT ) unless $r;  # || $e;
         $retry++ if $r;  # || $e;
         $read .= $r;
-        # $error .= $e;
         last if $r =~ m/\$\$end\$\$/s;
     }
-    warn "Read: $read \n" if $self->{debug};
-    # warn "Error: $error \n" if $self->{debug};
-
+    warn "Read: $read \n" 
+        if $self->{debug};
     $self->close 
         unless ( $read =~ m/\$\$ret\$\$/s );
-        
-    return $read;   # , $error;
+    return $read; 
 }
 
 sub close {
@@ -224,29 +194,20 @@ sub close {
 ##  warn "  ($output, $error) - exit \n" if $self->{debug};
 
     warn "closing handles\n" if $self->{debug};
-
     $self->{write_fh}->close;    # || die "bad pipe: $! $?";
     $self->{read_fh}->close;     # || die "bad pipe: $! $?";
-    # $self->{error_fh}->close;    # || die "bad pipe: $! $?";
-
     warn "wait pid\n" if $self->{debug};
-
     kill 9, $self->{parrot_pid};
-
     waitpid $self->{parrot_pid}, 0
         unless $^O =~ /win/i; # blocks I/O
-
     warn " closing => is_open = 0 \n"  if $self->{debug};
-
     $self->{is_open} = 0;
     return $self;
 }
 
 sub DESTROY {
     warn ref($_[0]) . "->DESTROY\n" if $_[0]->{debug};
-
     kill 9, $_[0]->{parrot_pid} if ref($_[0]);
-
     ## $_[0]->close;
 }
 
@@ -281,7 +242,7 @@ Inline::Parrot::parrot - a Parrot process
 
 =head1 SYNOPSIS
 
-    use Inline::Parrot;
+    use Inline::Parrot::parrot;
 
     my $p = Inline::Parrot::parrot->new(
         parrot_file_name => 'parrot',
@@ -290,7 +251,7 @@ Inline::Parrot::parrot - a Parrot process
         debug => 0,
     );
 
-    my ($output, $error) = $p->compile_and_run( <<'PARROT' );
+    my $output = $p->compile_and_run( <<'PARROT' );
   .pcc_sub _x0
             print "parrot ok\n"
             invoke P1
@@ -298,13 +259,12 @@ Inline::Parrot::parrot - a Parrot process
   .end
   PARROT
     print "output:\n" . $output . "\n";
-    print "error:\n"  . $error . "\n";
 
 =head1 DESCRIPTION
 
 This module provides an object-oriented, low-level interface to a Parrot process.
 
-The API is very unstable.
+The API is a bit unstable.
 
 =head1 METHODS
 
@@ -323,27 +283,45 @@ The default C<parrot_file_name> is determined at installation time by C<Makefile
 
 * compile( $string )
 
+  my $status = $parrot->compile( $code );
+
 Compiles the code, and leave the result in the Parrot process memory.
 
-Returns a status string (the string format definition is not stable).
-
-  my $status = $parrot->compile( $code );
+Returns a status string.
+The string format definition is not stable - see the source code for details.
 
 * compile_and_run( $string )
 
-Compiles the code, and leave the result in the Parrot process memory.
-
-Returns a status string (the string format definition is not stable).
-
   my $status = $parrot->compile_and_run( $code );
 
+Compiles the code, and leave the result in the Parrot process memory.
 The first subroutine in the code is called.
+
+The string format definition is not stable - see the source code for details.
+
 Perl parameters are passed as specified in the Parrot Calling Conventions:
 L<http://www.parrotcode.org/docs/pdd/pdd03_calling_conventions.html>
 
+The first subroutine in the code is called using the sequence:
+
+  find_global P0, "_subroutine_name"
+  invokecc
+
+Subroutines should return using code like this:
+
+  invoke P1
+
+or:
+
+  .local string s
+  s = "Goodbye"
+  .pcc_begin_return
+  .return s
+  .pcc_end_return
+
 * open
 
-Starts a Parrot process.
+Starts the Parrot process.
 
 C<open> is called automatically by C<new>.
 

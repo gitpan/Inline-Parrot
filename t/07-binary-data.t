@@ -1,21 +1,19 @@
-#########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
 
 use Test::More;
 BEGIN { plan tests => 6 };
 use Inline Parrot;
 ok(1); # If we made it this far, we're ok.   #'
 
-#########################
+# Tests if we can pass binary data between Perl and Parrot
 
 # $Inline::Parrot::parrot->debug( 1 );
 
 {
-    my $result = _hello( "done\n" . chr(0) . chr(10) . chr(13) . '\\' . '"' . chr(255) );
+    my $result = _hello( 
+        "done\n" . chr(0) . chr(10) . chr(13) . '\\' . '"' . chr(255) );
     is( $result, 
-        "done\n" . chr(0) . chr(10) . chr(13) . chr(92) . '"' . chr(255), 
-        "returns 1 value" );
+        "done\n" . chr(0) . chr(10) . chr(13) . '\\' . '"' . chr(255), 
+        "returns correct value" );
 }
 
 {
@@ -49,13 +47,6 @@ __Parrot__
 
     .pcc_begin_return
     .return s1
-    .pcc_end_return
-
-    .local string s2
-    s2 = s1
-    print s1
-    .pcc_begin_return
-    .return s2
     .pcc_end_return
 .end
 

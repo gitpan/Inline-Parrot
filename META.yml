@@ -1,11 +1,11 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Inline-Parrot
-version:      0.1101
-version_from: lib/Inline/Parrot.pm
-installdirs:  site
+--- #YAML:1.0
+name: Inline-Parrot
+version: 0.12
+author:
+  - Flavio S. Glock, E<lt>fglock@cpan.orgE<gt>
+abstract: Inline Parrot code in Perl5
+license: perl
 requires:
-    Inline:                        0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+  Inline: 0
+provides: {}
+generated_by: Module::Build version 0.25

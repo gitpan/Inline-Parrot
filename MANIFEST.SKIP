@@ -4,6 +4,10 @@
 ^pm_to_blib$
 ^_Inline/
 CVS/.*
+CVSROOT/*
+Build
+_build/*
+\.swp
 ,v$
 ^tmp/
 \.old$
