@@ -1,5 +1,10 @@
 Revision history for Perl extension Inline::Parrot.
 
+0.16  2004-12-13
+
+- the preprocessor is only called if the source contains ".macro" or ".include"
+- added links to the mailing lists.
+
 0.15  2004-11-24
 
 - passing an "undef" param to Parrot is ok

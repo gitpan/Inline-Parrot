@@ -12,7 +12,7 @@ use vars qw( $VERSION @ISA $parrot $DEBUG );
 @ISA = qw( Inline );
 
 BEGIN {
-    $VERSION = '0.15';
+    $VERSION = '0.16';
     $DEBUG = 0;
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
@@ -55,13 +55,18 @@ sub build {
     print "saving preprocessed code snippet [ $code ] into file [ $obj ] \n"
         if $DEBUG;
 
-    # - call the Parrot preprocessor
-    open PARROT_OBJ, "|-", $parrot->{parrot_file_name} . " -E  - > $obj"
-        or croak "Can't open Parrot preprocessor for file $obj\n$!";
-
-    # - uncomment to disable the Parrot preprocessor
-    # open PARROT_OBJ, ">", $obj
-    #    or croak "Can't write to $obj\n$!";
+    if ( $code =~ m/\b\.(?:macro|include)\b/ )
+    {
+        # - call the Parrot preprocessor
+        open PARROT_OBJ, "|-", $parrot->{parrot_file_name} . " -E  - > $obj"
+            or croak "Can't open Parrot preprocessor for file $obj\n$!";
+    }
+    else
+    {
+        # - don't use the Parrot preprocessor
+        open PARROT_OBJ, ">", $obj
+            or croak "Can't write to $obj\n$!";
+    }
 
     print PARROT_OBJ $code;
     close \*PARROT_OBJ;
@@ -408,8 +413,6 @@ L<Inline> - the Inline module
 
 L<http://www.parrotcode.org> - Parrot docs
 
-L<Inline::Parrot::parrot> - a Parrot process class
-
 L<http://www.perlmonks.org/?node_id=396890> - initial module idea
 
 A. Randal, D. Sugalsky, L. Tötsch. 
@@ -417,6 +420,10 @@ I<Perl6 and Parrot Essentials>.
 2nd Edition.
 O'Reilly, 2004.
 ISBN 0-596-00747-X.
+
+L<http://www.nntp.perl.org/group/perl.perl6.internals> - Parrot mailing list
+
+L<http://www.nntp.perl.org/group/perl.inline> - Inline mailing list
 
 =head1 AUTHOR
 
