@@ -65,5 +65,8 @@ Module::Build->new
       # sign        => 1,
       # create_makefile_pl => 'passthrough',
       pm_files    => { 'lib/Inline/Parrot/parrot-interp.pir' => 
-	               'lib/Inline/Parrot/parrot-interp.pir' },
+	               'lib/Inline/Parrot/parrot-interp.pir', 
+                       'lib/Inline/Parrot/parrot.pm' =>
+                       'lib/Inline/Parrot/parrot.pm',
+                     },
     )->create_build_script;

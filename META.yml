@@ -1,11 +1,13 @@
 --- #YAML:1.0
 name: Inline-Parrot
-version: 0.12
+version: 0.1201
 author:
   - Flavio S. Glock, E<lt>fglock@cpan.orgE<gt>
 abstract: Inline Parrot code in Perl5
 license: perl
 requires:
   Inline: 0
-provides: {}
+provides:
+  Inline::Parrot::parrot:
+    file: lib/Inline/Parrot/parrot.pm
 generated_by: Module::Build version 0.25

@@ -63,4 +63,9 @@ WriteMakefile(
     PREREQ_PM         => { 'Inline' => 0 }, 
     ABSTRACT_FROM     => 'lib/Inline/Parrot.pm', 
     AUTHOR            => 'Flavio S. Glock <fglock@cpan.org>',
+    PM                => { 'lib/Inline/Parrot/parrot-interp.pir' =>
+                           'lib/Inline/Parrot/parrot-interp.pir',
+                           'lib/Inline/Parrot/parrot.pm' =>
+                           'lib/Inline/Parrot/parrot.pm',
+                         },
 );

@@ -1,5 +1,11 @@
 Revision history for Perl extension Inline::Parrot.
 
+0.1201  2004-11-08
+
+- added "lib/Inline/Parrot/parrot.pm" to the list of files in Build.PL and Makefile.PL
+  in an attempt to fix "Can't locate Inline/Parrot/parrot.pm in @INC" during tests.
+  reported by Jost Krieger.
+
 0.12  2004-11-08
 
 - added "Release notes" section.
