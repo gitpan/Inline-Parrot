@@ -58,15 +58,23 @@ unless ( defined $parrot )
 
 
 Module::Build->new
-    ( module_name => 'Inline::Parrot',
-      author      => 'Flavio S. Glock <fglock@cpan.org>',
-      license     => 'perl',
-      requires    => { 'Inline' => 0 },
+    ( module_name   => 'Inline::Parrot',
+      author        => 'Flavio S. Glock <fglock@cpan.org>',
+      license       => 'perl',
+      create_makefile_pl => 'passthrough',
+      requires      =>     { 'Inline'     => 0, 
+                           'Carp'       => 0, 
+                           'File::Spec' => 0, 
+                           'IPC::Open3' => 0, 
+                           'IO::File'   => 0, 
+                         },
       # sign        => 1,
       # create_makefile_pl => 'passthrough',
-      pm_files    => { 'lib/Inline/Parrot/parrot-interp.pir' => 
-	               'lib/Inline/Parrot/parrot-interp.pir', 
-                       'lib/Inline/Parrot/parrot.pm' =>
-                       'lib/Inline/Parrot/parrot.pm',
-                     },
+      pm_files      =>   { 'lib/Inline/Parrot.pm' =>
+                           'lib/Inline/Parrot.pm',
+                           'lib/Inline/Parrot/parrot-interp.pir' =>
+                           'lib/Inline/Parrot/parrot-interp.pir',
+                           'lib/Inline/Parrot/parrot.pm' =>
+                           'lib/Inline/Parrot/parrot.pm',
+                         },
     )->create_build_script;

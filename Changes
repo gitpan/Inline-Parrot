@@ -1,5 +1,10 @@
 Revision history for Perl extension Inline::Parrot.
 
+0.13  2004-11-09
+
+- be very explicit about requirements in Build.PL
+- use Build.PL with { create_makefile_pl => 'passthrough' }
+
 0.1201  2004-11-08
 
 - added "lib/Inline/Parrot/parrot.pm" to the list of files in Build.PL and Makefile.PL

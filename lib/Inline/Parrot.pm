@@ -12,7 +12,7 @@ use vars qw( $VERSION @ISA $parrot $DEBUG );
 @ISA = qw( Inline );
 
 BEGIN {
-    $VERSION = '0.1201';
+    $VERSION = '0.13';
     $DEBUG = 0;
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
