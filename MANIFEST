@@ -14,6 +14,7 @@ t/03-crash-parrot.t
 t/04-args.t
 t/05-return.t
 t/06-prototype.t
+t/07-binary-data.t
 
 MANIFEST.SKIP
 META.yml                                 Module meta-data (added by MakeMaker)

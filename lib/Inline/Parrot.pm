@@ -12,7 +12,7 @@ use vars qw( $VERSION @ISA $parrot );
 @ISA = qw( Inline );
 
 BEGIN {
-    $VERSION = '0.0803';
+    $VERSION = '0.10';
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
         # parrot_interpreter_file_name => 'parrot-interp.pir',
@@ -85,12 +85,12 @@ sub load {
     {
         if ( m/^\s*\.pcc_sub\s+(\w+)/ )
         {
-             # prototyped == must use the parameter list  XXX
-             # non_prototyped == use @_  XXX
+            # prototyped == must use the parameter list  XXX
+            # non_prototyped == use @_  XXX
 
-             push @sub_name, $1;                
-             $sub_name = $1;
-             $sub_prototyped{ $sub_name } = m/\bprototyped\b/  ? "prototyped" : "non_prototyped";
+            push @sub_name, $1;                
+            $sub_name = $1;
+            $sub_prototyped{ $sub_name } = m/\bprototyped\b/  ? "prototyped" : "non_prototyped";
             $sub_param{ $sub_name } = [];
         }
         
@@ -114,7 +114,7 @@ package '.$package.' ;
 sub     '.$sub_name.'      {
     # warn "start parrot sub '.$sub_name.' \n";
 
-    my $param = '.$inline_package.'::_setup_parrot_parameters( "'.$sub_name.'", @_ );
+    my ( $param, $value ) = '.$inline_package.'::_setup_parrot_parameters( "'.$sub_name.'", @_ );
 
     my $cmd =
         ".pcc_sub _start_sub_'.$sub_name.'\n" .
@@ -133,14 +133,14 @@ sub     '.$sub_name.'      {
         ".end\n" ;
 
     # print "cmd [ \n$cmd ] \n";
-    my ( $status, $error ) = $Inline::Parrot::parrot->compile_and_run( $cmd );
+    my ( $status, $error ) = $Inline::Parrot::parrot->compile_and_run( $cmd, $value );
 
     # print "parrot returned status [ $status -- $error ]\n";
 
     my ( $stdout, $return ) = $status =~ 
         m/\$\$start\$\$\n(.*)\n\$\$ret\$\$\n(.*)\$\$end\$\$/s;
     print $stdout if $stdout;
-    # print STDOUT "Return: $return\n";
+    #print STDOUT "Return: $return\n";
     my @return = split /\n/s , $return;
 
     # XXX
@@ -153,6 +153,28 @@ sub     '.$sub_name.'      {
     # my @int_return = splice @return => 0, $int_count-1;
     # my @string_return = splice @return => 0, $string_count-1;
     # XXX
+
+    my @ret;
+
+    while ( @return )
+    {
+
+    my $strlen = shift @return;
+    my $str;
+    $str = shift @return;
+    while ( length( $str ) < $strlen )
+    {
+        $str .= "\n";
+        #last unless @return;
+        #next unless length( $str ) < $strlen ;
+        my $s = shift @return;
+        $str .= $s if defined $s;
+    }
+    push @ret, $str;
+
+    }
+
+    @return = @ret;
 
     # print "Return list: @return \n";
     # warn "end parrot sub '.$sub_name.' \n";
@@ -189,6 +211,7 @@ sub _setup_parrot_parameters {
     # TODO: add code for accepting arrays, hashes, references, callbacks
     
     my $param = "";
+    my $value = "";
     my $param_count = scalar @_;
     
     $param .= "  find_global sub, \"$sub_name\" \n";
@@ -207,7 +230,9 @@ sub _setup_parrot_parameters {
         if ( $def )
         {
             $param .= "  .local $def->{type} $def->{name}\n";
-            $param .= "  $def->{name} = \"$val\"\n";
+            $param .= "  read \$S12, ". length($val) ."\n";
+            $param .= "  set $def->{name}, \$S12\n";
+            $value .= $val;
         }
         else
         {
@@ -232,7 +257,7 @@ sub _setup_parrot_parameters {
     }
     
     # print "Param \n$param \n";
-    return $param;
+    return ( $param, $value );
 }
 
 1;
@@ -272,7 +297,7 @@ Inline::Parrot - Inline Parrot code in Perl5
 
 =head1 SYNOPSIS
 
-  use Inline Parrot;       # don't use :: 
+  use Inline Parrot;   
   print "Start Perl\n";
   my $s = _hello( "world" );
   print "$s\n";
@@ -305,21 +330,15 @@ output:
 
 =head1 DESCRIPTION
 
-The Inline::Parrot module allows you to put Parrot source code directly 
+The Inline::Parrot module allows you to insert Parrot source code directly 
 "inline" in a Perl script or module.
 
-=head1 CALLING CONVENTIONS
-
-Perl parameters are passed as specified in the Parrot Calling Conventions.
-
+Perl parameters are passed as specified in the Parrot Calling Conventions:
 L<http://www.parrotcode.org/docs/pdd/pdd03_calling_conventions.html>
 
-=head1 GLOBAL VARIABLES
+=head2 GLOBAL VARIABLES
 
-* C<$Inline::Parrot::parrot>
-
-A Parrot interpreter object. 
-
+C<$Inline::Parrot::parrot> - A Parrot interpreter object. 
 See L<Inline::Parrot::parrot> for the available methods.
 
 =head1 SEE ALSO

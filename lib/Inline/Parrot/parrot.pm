@@ -87,11 +87,11 @@ sub open {
     warn "    Command line: $cmd\n" if $self->{debug};
     $self->{write_fh} = new IO::File;
     $self->{read_fh}  = new IO::File;
-    $self->{error_fh} = new IO::File;
+    # $self->{error_fh} = new IO::File;
     $self->{parrot_pid} = IPC::Open3::open3(
         $self->{write_fh}, 
         $self->{read_fh}, 
-        $self->{error_fh},
+        $self->{read_fh},
        
         $self->{parrot_file_name},
         @{ $self->{parrot_options} },
@@ -136,6 +136,7 @@ sub compile {
 sub compile_and_run {
     my $self = shift;
     my $code = shift;
+    my $data = shift;
     warn ref($self) . "->compile_and_run\n" if $self->{debug};
 
     # print STDERR "Is open? " . $self->{is_open} . "\n";
@@ -170,28 +171,34 @@ sub compile_and_run {
     $self->{write_fh}->print( $code ) 
         or die "can't talk to Parrot process: $@";
 
+    if ( defined $data )
+    {
+    $self->{write_fh}->print( $data ) 
+        or die "can't talk to Parrot process: $@";
+    }
+
     $self->{read_fh}->blocking(0);
-    $self->{error_fh}->blocking(0);
+    #$self->{error_fh}->blocking(0);
     
     #$self->{write_fh}->close;
 
     my $read = "";
-    my $error = "";
+    # my $error = "";
     my $retry = 10;
     my $r = "";
-    my $e = "";
+    # my $e = "";
     my $start_count = 0;
     while( $retry-- ) {
         $r = $self->{read_fh}->getline || "";
         # print "[$r]";
         $start_count++ if $r =~ m/\$\$start\$\$/s;
         last if $start_count > 2;
-        $e = $self->{error_fh}->getline || ""
-            unless $^O =~ /win/i; # blocks I/O
-        select ( undef, undef, undef, SELECT_TIMEOUT ) unless $r || $e;
-        $retry++ if $r || $e;
+        # $e = $self->{error_fh}->getline || ""
+        #    unless $^O =~ /win/i; # blocks I/O
+        select ( undef, undef, undef, SELECT_TIMEOUT ) unless $r;  # || $e;
+        $retry++ if $r;  # || $e;
         $read .= $r;
-        $error .= $e;
+        # $error .= $e;
         last if $r =~ m/\$\$end\$\$/s;
     }
     warn "Read: $read \n" if $self->{debug};
@@ -200,8 +207,7 @@ sub compile_and_run {
     $self->close 
         unless ( $read =~ m/\$\$ret\$\$/s );
         
-    # Windows will not return errors
-    return $read, $error;
+    return $read;   # , $error;
 }
 
 sub close {
@@ -221,7 +227,7 @@ sub close {
 
     $self->{write_fh}->close;    # || die "bad pipe: $! $?";
     $self->{read_fh}->close;     # || die "bad pipe: $! $?";
-    $self->{error_fh}->close;    # || die "bad pipe: $! $?";
+    # $self->{error_fh}->close;    # || die "bad pipe: $! $?";
 
     warn "wait pid\n" if $self->{debug};
 
@@ -321,9 +327,7 @@ Compiles the code, and leave the result in the Parrot process memory.
 
 Returns a status string and an error string:
 
-  my ( $status, $error ) = $parrot->compile( $code );
-
-Under Windows, $error is always an empty string.
+  my $status = $parrot->compile( $code );
 
 * compile_and_run( $string )
 
@@ -331,7 +335,7 @@ Compiles the code, and leave the result in the Parrot process memory.
 
 Returns a status string and an error string:
 
-  my ( $status, $error ) = $parrot->compile_and_run( $code );
+  my $status = $parrot->compile_and_run( $code );
 
 Under Windows, $error is always an empty string.
 

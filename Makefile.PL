@@ -4,13 +4,21 @@ use 5.00503;
 use strict;
 use ExtUtils::MakeMaker;
 
+my $octave;
+
+# try to retrieve the current configuration
+
+    eval " use Inline::Parrot::parrot; ";
+    $octave = $Inline::Parrot::parrot::parrot_interpreter_bin || "parrot";
+
+    # clear "used only once" warning
+    $Inline::Parrot::parrot::parrot_interpreter_bin = 
+        $Inline::Parrot::parrot::parrot_interpreter_bin;
+
 # The following code was reused from Andy Adler's Inline::Octave
 
-#
-#   Find parrot
-#
+# Find parrot
 
-my $octave= "parrot";
 my $octave_validated= 0;
 
 # check if interpreter was specified on cmd line

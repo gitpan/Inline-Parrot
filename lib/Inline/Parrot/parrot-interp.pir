@@ -1,4 +1,53 @@
 
+.macro print_int( I )
+    saveall
+    $S11 = .I
+    length $I9, $S11
+    print $I9
+    print "\n"
+    print  $S11
+    print  "\n"
+    restoreall
+    dec    I1
+.endm
+
+.macro print_str( S )
+    saveall
+    length $I9, .S
+    print $I9
+    print "\n" 
+    # .S = _encode__( .S )
+    print  .S
+    print  "\n"
+    restoreall
+    dec    I2
+.endm
+
+.macro print_pmc( P )
+    saveall
+    $S11 = .P
+    length $I9, $S11
+    print $I9
+    print "\n" 
+    # $S11 = _encode__( $S11 )
+    print  $S11
+    print  "\n"
+    restoreall
+    dec    I3
+.endm
+
+.macro print_float( N )
+    saveall
+    $S11 = .N
+    length $I9, $S11
+    print $I9
+    print "\n"
+    print  $S11
+    print  "\n"
+    restoreall
+    dec    I4
+.endm
+
 # START_PARROT
 
 .pcc_sub _parrot_interpreter__
@@ -110,145 +159,59 @@ L3:
     print  I4   # float count
     print  "\n"
 
-    # TODO - use "Indirect PMC register set" - setx_ind   XXX
-
     # TODO - non-prototyped return
 
     # return integers
 
-    unless I1, INT_END 
-    print  I5
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I6
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I7
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I8
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I9
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I10
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I11
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I12
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I13
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I14
-    print  "\n"
-    dec    I1
-
-
-    unless I1, INT_END 
-    print  I15
-    print  "\n"
-    dec    I1
+    unless I1, INT_END
+    .print_int( S5 )
+    unless I1, INT_END
+    .print_int( S6 )
+    unless I1, INT_END
+    .print_int( S7 )
+    unless I1, INT_END
+    .print_int( S8 )
+    unless I1, INT_END
+    .print_int( S9 )
+    unless I1, INT_END
+    .print_int( S10 )
+    unless I1, INT_END
+    .print_int( S11 )
+    unless I1, INT_END
+    .print_int( S12 )
+    unless I1, INT_END
+    .print_int( S13 )
+    unless I1, INT_END
+    .print_int( S14 )
+    unless I1, INT_END
+    .print_int( S15 )
 
 INT_END:
 
     # return strings
 
     unless I2, STRING_END 
-    print  S5
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S5 )
     unless I2, STRING_END 
-    print  S6
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S6 )
     unless I2, STRING_END 
-    print  S7
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S7 )
     unless I2, STRING_END 
-    print  S8
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S8 )
     unless I2, STRING_END 
-    print  S9
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S9 )
     unless I2, STRING_END 
-    print  S10
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S10 )
     unless I2, STRING_END 
-    print  S11
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S11 )
     unless I2, STRING_END 
-    print  S12
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S12 )
     unless I2, STRING_END 
-    print  S13
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S13 )
     unless I2, STRING_END 
-    print  S14
-    print  "\n"
-    dec    I2
-
-
+    .print_str( S14 )
     unless I2, STRING_END 
-    print  S15
-    print  "\n"
-    dec    I2
+    .print_str( S15 )
 
 STRING_END:
 
@@ -256,73 +219,56 @@ STRING_END:
     # TODO: check if they are printable   XXX
 
     unless I3, PMC_END 
-    print  P5
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P5 )
     unless I3, PMC_END 
-    print  P6
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P6 )
     unless I3, PMC_END 
-    print  P7
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P7 )
     unless I3, PMC_END 
-    print  P8
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P8 )
     unless I3, PMC_END 
-    print  P9
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P9 )
     unless I3, PMC_END 
-    print  P10
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P10 )
     unless I3, PMC_END 
-    print  P11
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P11 )
     unless I3, PMC_END 
-    print  P12
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P12 )
     unless I3, PMC_END 
-    print  P13
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P13 )
     unless I3, PMC_END 
-    print  P14
-    print  "\n"
-    dec    I3
-
-
+    .print_pmc( P14 )
     unless I3, PMC_END 
-    print  P15
-    print  "\n"
-    dec    I3
+    .print_pmc( P15 )
 
 PMC_END:
 
-    # TODO: float results   XXX
+    # return real numbers
+
+    unless I4, FLOAT_END
+    .print_float( N5 )
+    unless I4, FLOAT_END
+    .print_float( N6 )
+    unless I4, FLOAT_END
+    .print_float( N7 )
+    unless I4, FLOAT_END
+    .print_float( N8 )
+    unless I4, FLOAT_END
+    .print_float( N9 )
+    unless I4, FLOAT_END
+    .print_float( N10 )
+    unless I4, FLOAT_END
+    .print_float( N11 )
+    unless I4, FLOAT_END
+    .print_float( N12 )
+    unless I4, FLOAT_END
+    .print_float( N13 )
+    unless I4, FLOAT_END
+    .print_float( N14 )
+    unless I4, FLOAT_END
+    .print_float( N15 )
+
+FLOAT_END:
 
     #----------
     # tell that everything is ok
@@ -340,3 +286,4 @@ PMC_END:
     # invoke P1  # end of subroutine
 
 .end
+

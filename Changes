@@ -1,10 +1,14 @@
 Revision history for Perl extension Inline::Parrot.
 
-0.0801 / 0.0802 / 0.0803
+0.10  2004-10-15
 
-- updated Inline::Parrot SYNOPSIS
-- updated Inline::Parrot::parrot SYNOPSIS 
-- updated CALLING CONVENTIONS section
+- parameters may contain binary data.
+- Makefile.PL retrieves the current installed configuration.
+- documentation updates
+
+0.09
+
+[this version was rolled back]
 
 0.08  2004-10-13
 
