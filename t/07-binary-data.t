@@ -1,6 +1,6 @@
 
 use Test::More;
-BEGIN { plan tests => 6 };
+BEGIN { plan tests => 14 };
 use Inline Parrot;
 ok(1); # If we made it this far, we're ok.   #'
 
@@ -14,6 +14,36 @@ ok(1); # If we made it this far, we're ok.   #'
     is( $result, 
         "done\n" . chr(0) . chr(10) . chr(13) . '\\' . '"' . chr(255), 
         "returns correct value" );
+}
+
+{
+    my ( $a, $b, $c ) = _empty(
+        "a", "", "c" );
+    ok( defined $b, "returns empty string" );
+    is( $a,
+        "a",
+        "returns empty string (1)" );
+    is( $b,
+        "",
+        "returns empty string (2)" );
+    is( $c,
+        "c",
+        "returns empty string (3)" );
+}
+
+{
+    my ( $a, $b, $c ) = _undef_pmc(
+        "a", "b", "c" );
+    ok( ! defined $c, "returns undef" );
+    is( $a,
+        "a",
+        "returns undef (1)" );
+    is( $b,
+        "c",
+        "returns undef (2)" );
+    is( $c,
+        undef,
+        "returns undef (3)" );
 }
 
 {
@@ -47,6 +77,32 @@ __Parrot__
 
     .pcc_begin_return
     .return s1
+    .pcc_end_return
+.end
+
+.pcc_sub _empty
+    .param string s1
+    .param string s2
+    .param string s3
+
+    .pcc_begin_return
+    .return s1
+    .return s2
+    .return s3
+    .pcc_end_return
+.end
+
+.pcc_sub _undef_pmc
+    .param string s1
+    .param string s2
+    .param string s3
+
+    null $P0
+
+    .pcc_begin_return
+    .return s1
+    .return s3
+    .return $P0
     .pcc_end_return
 .end
 

@@ -12,7 +12,7 @@ use vars qw( $VERSION @ISA $parrot $DEBUG );
 @ISA = qw( Inline );
 
 BEGIN {
-    $VERSION = '0.13';
+    $VERSION = '0.14';
     $DEBUG = 0;
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
@@ -57,6 +57,8 @@ sub build {
 
     open PARROT_OBJ, "|-", $parrot->{parrot_file_name} . " -E  - > $obj"
         or croak "Can't open Parrot preprocessor for file $obj\n$!";
+    # open PARROT_OBJ, ">", $obj
+    #     or croak "Can't write to $obj\n$!";
     print PARROT_OBJ $code;
     close \*PARROT_OBJ;
 }
@@ -110,7 +112,7 @@ sub load {
     {
         my ( $error ) = $status =~ m/\$\$start\$\$\n(.*)/s;
         warn "Error compiling Parrot, near subroutine \"$sub_name\" ".
-             " in package $package: $error\n";
+             "in package $package: $error\n";
     }
  
     my $inline_package = __PACKAGE__;
@@ -177,8 +179,14 @@ sub     '.$sub_name.'      {
     while ( @return )
     {
         my $strlen = shift @return;
+        if ( $strlen == -1 )
+        {
+            push @ret, undef;
+            shift @return;
+            next;
+        }
         my $str;
-        $str = shift @return;
+        $str = shift @return || "";
         while ( length( $str ) < $strlen )
         {
             $str .= "\n";
@@ -357,14 +365,17 @@ See L<Inline::Parrot::parrot> for the available methods.
 
 =head2 Release notes
 
-The current version does not work with arrays, hashes, references, and special values such as C<undef>.
-All parameters passed between Perl and Parrot are stringified scalars.
+The current version does not work with arrays, hashes, references.
+All parameters passed between Perl and Parrot are stringified scalars, or C<undef> / C<null pmc>.
 
 If you modify an included file, this change may not be noticed by C<Inline::Parrot>.
 That's because C<.include> statements are evaluated only when the main Parrot code changes.
 
 The Parrot code should not try to read from C<STDIN>.
 The C<STDIN> handle is currently used internally by the Parrot interpreter.
+
+Returned parameters are ordered by type (C<int>, C<string>, C<pmc>, C<float>), 
+instead of declaration order.
 
 =head1 SEE ALSO
 

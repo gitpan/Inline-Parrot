@@ -52,12 +52,20 @@ at your option, any later version of Perl 5 you may have available.
 .macro print_pmc( P )
     unless I3, PMC_END 
     saveall
+    isnull .P, .$IS_NULL
+    goto .$NOT_NULL
+  .local $IS_NULL:
+    print -1
+    print "\n"
+    goto .$END_LINE
+  .local $NOT_NULL:
     $S11 = .P
     length $I9, $S11
     print $I9
     print "\n" 
     # $S11 = _encode__( $S11 )
     print  $S11
+  .local $END_LINE:
     print  "\n"
     restoreall
     dec    I3

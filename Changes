@@ -1,5 +1,13 @@
 Revision history for Perl extension Inline::Parrot.
 
+0.14  2004-11-10
+
+- empty string parameters are handled properly
+- Parrot can now return "null pmc" type
+- Tried to fix infinite loop while looking for "parrot" on Build.PL,
+  but it was already fixed. Reported by Barbie (for version 0.08).
+- more "Release notes"
+
 0.13  2004-11-09
 
 - be very explicit about requirements in Build.PL

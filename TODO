@@ -19,7 +19,9 @@ TODO list for Perl extension Inline::Parrot.
 
 - test for different encodings
 - test prototyped/non-prototyped parameters/return values
-- allow "undef" parameters
+- allow "undef" parameters:  
+  - returning "null" is ok; add tests for "PerlUndef"
+  - accept "null" as input.
 - it doesn't pass data structures back and forth.
   you can't pass a data structure by reference - this is not 
   likely to be fixable, because the perl and the parrot processes
