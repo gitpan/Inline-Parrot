@@ -9,6 +9,7 @@ use constant SELECT_TIMEOUT => 0.05;
 
 use vars qw( $parrot_interpreter_bin );
 
+# --- The following line is edited by the Makefile.PL script
 $parrot_interpreter_bin = 'parrot'; # _EDITLINE_MARKER_
 
 # --- TODO
@@ -275,14 +276,6 @@ Inline::Parrot::parrot - a Parrot process
 =head1 SYNOPSIS
 
     use Inline::Parrot;
-
-    # make a Parrot interpreter source file
-    unless ( -e "parrot-interp.pir" )
-    {
-        open( FILE, ">", "parrot-interp.pir" );
-        print FILE Inline::Parrot::parrot->get_interpreter_code;
-        close( FILE );
-    }
 
     my $p = Inline::Parrot::parrot->new(
         parrot_file_name => 'parrot',

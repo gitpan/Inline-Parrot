@@ -1,8 +1,9 @@
 TODO list for Perl extension Inline::Parrot.
 
 - how to create a signature for the return values?
+- returned values are currently unordered
 - subs without signature should use PMC, instead of string
-- use "freeze/thaw"
+- use "freeze/thaw", Data::Dumper, or Storable
 
 - process .include
 
@@ -13,6 +14,7 @@ TODO list for Perl extension Inline::Parrot.
 unless it is Win95.
 - use other pipes instead of STDIN/STDOUT/STDERR
 - set up an exception handler to get the error messages into STDOUT
+- Test what happens if STDIN is read by Parrot
 
 - The parrot subroutines should be created under the same namespace as 
 the current Perl module
@@ -36,8 +38,6 @@ likely to be fixable, because the perl and the parrot processes
 don't share memory. But this can be emulated (slow).
 
 - Documentation
-
-- Test what happens if STDIN is read by Parrot
 
 - Test what happens with Perl when Parrot sleep's, and vice-versa
 - Perl may give Parrot a timeout, if Parrot make a sleep.

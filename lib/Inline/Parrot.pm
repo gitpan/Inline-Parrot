@@ -12,15 +12,13 @@ use vars qw( $VERSION @ISA $parrot );
 @ISA = qw( Inline );
 
 BEGIN {
-    # warn "beginning\n";
-    $VERSION = '0.0801';
+    $VERSION = '0.0802';
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
         # parrot_interpreter_file_name => 'parrot-interp.pir',
         parrot_options => [],
         debug => 0,
     );
-    # warn "finish begin\n";
 }
 
 sub register {
@@ -45,8 +43,6 @@ sub build {
     my $o = shift;
     my $code = $o->{API}{code};
     my $pattern = $o->{ILSM}{PATTERN};
-
-    # my ( $sub_name ) = $code =~ m/\.pcc_sub\s+(\w+)/s; 
 
     my $path = File::Spec->catdir(
         $o->{API}{install_lib},'auto',$o->{API}{modpname});
@@ -82,6 +78,7 @@ sub load {
     # warn "Loaded [\n@code ]\n";
     # warn "Package $package\n";
 
+    # --- parser ---
     # Look for ".pcc_sub" / ".param"
     my $sub_name = "";
     for ( @code )
@@ -102,18 +99,6 @@ sub load {
              push @{ $sub_param{ $sub_name } }, { type => $1, name => $2 };
         }                
     }
-    
-    # my ( @sub_name ) = $code =~ m/^\s*\.pcc_sub\s+(\w+)/msg;
-
-    # warn "loading sub: @sub_name\n";
-    #for my $sub_name ( @sub_name )
-    #{
-    #    print "Sub $sub_name  $sub_prototyped{ $sub_name } \n";
-    #    for my $param ( @{ $sub_param{ $sub_name } } )
-    #    {
-    #        print "    $param->{name} is $param->{type} \n";
-    #    }
-    #}
     
     # send the code to the Parrot compiler
     my ( $status, $error ) = $parrot->compile( join '' => @code );
@@ -315,7 +300,7 @@ L<http://www.parrotcode.org/docs/pdd/pdd03_calling_conventions.html>
 
 * C<$Inline::Parrot::parrot>
 
-The Parrot interpreter object. 
+A Parrot interpreter object. 
 
 See L<Inline::Parrot::parrot> for the available methods.
 
@@ -346,7 +331,6 @@ Copyright (C) 2004 by Flavio S. Glock
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.4 or,
 at your option, any later version of Perl 5 you may have available.
-
 
 =cut
 
