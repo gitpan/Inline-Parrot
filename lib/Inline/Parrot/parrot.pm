@@ -10,7 +10,7 @@ use constant SELECT_TIMEOUT => 0.05;
 use vars qw( $parrot_interpreter_bin );
 
 # --- The following line is edited by the Makefile.PL script
-$parrot_interpreter_bin = '/home/fglock/temp/parrot-0.1.1/parrot'; # _EDITLINE_MARKER_
+$parrot_interpreter_bin = 'parrot'; # _EDITLINE_MARKER_
 
 # --- TODO
 #

@@ -47,5 +47,5 @@ don't share memory. But this can be emulated (slow).
 - Test what happens with Perl when Parrot sleep's, and vice-versa
 - Perl may give Parrot a timeout, if Parrot make a sleep.
 
-- Test with Perl threads
+- Test with Perl threads; Parrot threads
 

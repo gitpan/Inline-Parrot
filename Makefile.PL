@@ -1,68 +1,53 @@
 #!perl -w
 
-use 5.00503;
 use strict;
 use ExtUtils::MakeMaker;
 
+# some code from Inline::Octave
+
 my $octave;
-
-# try to retrieve the current configuration
-
-    eval " use Inline::Parrot::parrot; ";
-    $octave = $Inline::Parrot::parrot::parrot_interpreter_bin || "parrot";
-
-    # clear "used only once" warning
-    $Inline::Parrot::parrot::parrot_interpreter_bin = 
-        $Inline::Parrot::parrot::parrot_interpreter_bin;
-
-# The following code was reused from Andy Adler's Inline::Octave
-
-# Find parrot
-
-my $octave_validated= 0;
-
-# check if interpreter was specified on cmd line
+# check if Parrot interpreter was specified on cmd line
 foreach (@ARGV) {
    if (/^PARROT=(.+)/) {
       $octave= $1;
-      $octave_validated= 1;
       $_= "";
    }
 }   
 
-while (not $octave_validated) {
-   $octave_validated= 1 if `$octave -V` =~ /parrot version (\d+\.\d+\.\d+)/s;
-   my $octave_version= $1;
+unless ( defined $octave )
+{
+    # retrieve current configuration
+    eval " use Inline::Parrot::parrot; ";
+    $octave = $Inline::Parrot::parrot::parrot_interpreter_bin || "parrot";
+    # clear "used only once" warning
+    $Inline::Parrot::parrot::parrot_interpreter_bin =
+        $Inline::Parrot::parrot::parrot_interpreter_bin;
 
-   if ($octave_validated) {
-      print "Found parrot:[$octave] (version $octave_version)\n";
-      print "Enter new executable path or <RETURN> to accept: ";
-   }
-   else 
-   {
-      print "Unable to find parrot at:[$octave]\n";
-      print "Please enter new path to executable: " ;
+    my $version = `$octave -V`;
+    my $octave_validated = 1 
+        if $version && $version =~ /parrot version (\d+\.\d+\.\d+)/is;
+    my $octave_version = $1;
 
-   }
-   
-   chomp( my $inp= <STDIN> );
-   if ($inp) {
-      $octave_validated= 0;
-      $octave= $inp;
-   }
+    if ($octave_validated) {
+        print "Found parrot: [$octave] (version $octave_version)\n";
+        $octave = prompt ( "Please enter new path to Parrot executable " .
+                      "or <RETURN> to accept:", $octave );
+    }
+    else 
+    {
+        print "Unable to find parrot at: [$octave]\n";
+        $octave = prompt ( "Please enter new path to Parrot executable:" );
+    }
 }
 
-#
-# Rewrite parrot.pm 
-#
-   print "\nFixing parrot.pm for parrot path...\n" ;
+   print "\nFixing module parrot.pm for parrot path...\n" ;
    open(OCTAVE, "<lib/Inline/Parrot/parrot.pm") 
        or die "Can't open parrot.pm for reading" ;
    my @lines = <OCTAVE> ;
    close(OCTAVE) ;
 
    open(OCTAVE, ">lib/Inline/Parrot/parrot.pm") 
-       or die "Can't open Octave.pm for writing" ;
+       or die "Can't open parrot.pm for writing" ;
    foreach my $line (@lines) {
       $line =~ 
          s{(\$parrot_interpreter_bin\s*=\s*)'.+?'(;\s*#\s*_EDITLINE_MARKER_)}
@@ -72,13 +57,10 @@ while (not $octave_validated) {
    close(OCTAVE) ;
 
 
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
 WriteMakefile(
     NAME              => 'Inline::Parrot',
-    VERSION_FROM      => 'lib/Inline/Parrot.pm', # finds $VERSION
-    PREREQ_PM         => { 'Inline' => 0 }, # e.g., Module::Name => 1.1
-    ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM  => 'lib/Inline/Parrot.pm', # retrieve abstract from module
-       AUTHOR         => 'Flavio S. Glock <fglock@>') : ()),
+    VERSION_FROM      => 'lib/Inline/Parrot.pm',
+    PREREQ_PM         => { 'Inline' => 0 }, 
+    ABSTRACT_FROM     => 'lib/Inline/Parrot.pm', 
+    AUTHOR            => 'Flavio S. Glock <fglock@>',
 );

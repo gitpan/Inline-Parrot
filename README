@@ -7,12 +7,17 @@ INSTALLATION
 
 To install this module type the following:
 
-   perl Makefile.PL
+   parrot -V       
+     #   this will check that you have Parrot installed
+
+   perl Makefile.PL   
+     #   you will be asked where Parrot is installed
+
    make
    make test
    make install
 
-You can specify where the parrot binary is installed:
+You can specify where Parrot is installed in the command line:
 
    perl Makefile.PL PARROT=/usr/bin/parrot
    make
