@@ -12,7 +12,7 @@ use vars qw( $VERSION @ISA $parrot );
 @ISA = qw( Inline );
 
 BEGIN {
-    $VERSION = '0.0802';
+    $VERSION = '0.0803';
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
         # parrot_interpreter_file_name => 'parrot-interp.pir',
@@ -272,18 +272,36 @@ Inline::Parrot - Inline Parrot code in Perl5
 
 =head1 SYNOPSIS
 
-  use Inline::Parrot;
+  use Inline Parrot;       # don't use :: 
   print "Start Perl\n";
-  _hello();
+  my $s = _hello( "world" );
+  print "$s\n";
   print "End Perl\n";
 
   __END__
   __Parrot__
 
   .pcc_sub _hello   
-      print "Hello world\n"
-      invoke P1 
+    .param string x
+
+    print "Hello "
+    print x
+    print "\n"
+
+    .local string s
+    s = "Goodbye "
+    s = s . x
+    .pcc_begin_return
+    .return s
+    .pcc_end_return
   .end
+
+output:
+
+  Start Perl
+  Hello world
+  Goodbye world
+  End Perl
 
 =head1 DESCRIPTION
 

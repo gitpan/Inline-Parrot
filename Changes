@@ -1,7 +1,8 @@
 Revision history for Perl extension Inline::Parrot.
 
-0.0801 / 0.0802
+0.0801 / 0.0802 / 0.0803
 
+- updated Inline::Parrot SYNOPSIS
 - updated Inline::Parrot::parrot SYNOPSIS 
 - updated CALLING CONVENTIONS section
 
