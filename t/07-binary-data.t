@@ -1,6 +1,6 @@
 
 use Test::More;
-BEGIN { plan tests => 14 };
+BEGIN { plan tests => 16 };
 use Inline Parrot;
 ok(1); # If we made it this far, we're ok.   #'
 
@@ -44,6 +44,12 @@ ok(1); # If we made it this far, we're ok.   #'
     is( $c,
         undef,
         "returns undef (3)" );
+}
+
+{
+    my @a = _undef_pmc_2( undef );
+    is( scalar @a, 1, "pass undef, returns undef" );
+    is( $a[0], undef, "pass undef, returns undef (2)" );
 }
 
 {
@@ -103,6 +109,13 @@ __Parrot__
     .return s1
     .return s3
     .return $P0
+    .pcc_end_return
+.end
+
+.pcc_sub _undef_pmc_2
+    # .param pmc p3   - XXX there is some bug with the preprocessor ?
+    .pcc_begin_return
+    .return P5
     .pcc_end_return
 .end
 

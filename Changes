@@ -1,5 +1,11 @@
 Revision history for Perl extension Inline::Parrot.
 
+0.15  2004-11-24
+
+- passing an "undef" param to Parrot is ok
+  note: it looks like there is a bug in the Parrot preprocessor,
+  that makes it difficult to declare pmc parameters - opened a parrot-bug ticket.
+
 0.14  2004-11-10
 
 - empty string parameters are handled properly

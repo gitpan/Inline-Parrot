@@ -12,7 +12,7 @@ use vars qw( $VERSION @ISA $parrot $DEBUG );
 @ISA = qw( Inline );
 
 BEGIN {
-    $VERSION = '0.14';
+    $VERSION = '0.15';
     $DEBUG = 0;
     $parrot = Inline::Parrot::parrot->new(
         # parrot_file_name => 'parrot',
@@ -55,10 +55,14 @@ sub build {
     print "saving preprocessed code snippet [ $code ] into file [ $obj ] \n"
         if $DEBUG;
 
+    # - call the Parrot preprocessor
     open PARROT_OBJ, "|-", $parrot->{parrot_file_name} . " -E  - > $obj"
         or croak "Can't open Parrot preprocessor for file $obj\n$!";
+
+    # - uncomment to disable the Parrot preprocessor
     # open PARROT_OBJ, ">", $obj
-    #     or croak "Can't write to $obj\n$!";
+    #    or croak "Can't write to $obj\n$!";
+
     print PARROT_OBJ $code;
     close \*PARROT_OBJ;
 }
@@ -85,6 +89,7 @@ sub load {
     my $sub_name = "";
     for ( @code )
     {
+        # print "> $_";
         if ( m/^\s*\.pcc_sub\s+(\w+)/ )
         {
             # prototyped == must use the parameter list  XXX
@@ -96,9 +101,10 @@ sub load {
             $sub_param{ $sub_name } = [];
         }
         
-        if ( m/^\s*\.param\s+(\w+)\s+(\w+)/ )
+        if ( my ( $type, $name ) = m/^\s*\.param\s+(\w+)\s+(\w+)/ )
         {
-             push @{ $sub_param{ $sub_name } }, { type => $1, name => $2 };
+             # print "    Param entry: $_   ( $type, $name ) \n";
+             push @{ $sub_param{ $sub_name } }, { type => $type, name => $name };
         }                
     }
     
@@ -138,7 +144,7 @@ sub     '.$sub_name.'      {
         "    .pcc_call sub\n" .
         "  .pcc_end\n" .
 
-        # don\'t mess with the return values
+        # -- don\'t mess with the return values
         # "  .pcc_begin_return\n" .
         # "  .pcc_end_return\n" .
 
@@ -162,7 +168,21 @@ sub     '.$sub_name.'      {
         m/\$\$start\$\$\n(.*)\n\$\$ret\$\$\n(.*)\$\$end\$\$/s;
     print $stdout if $stdout;
     #print STDOUT "Return: $return\n";
-    my @return = split /\n/s , $return;
+    return '.$inline_package.'::_setup_return_values( $return );
+}
+    ';
+
+        # warn "Cmd [ $perl_accessor ]\n";
+        eval $perl_accessor;
+        croak "Unable to load Parrot module $sub_name:\n$@" if $@;
+    }
+}
+
+sub info {
+}
+
+sub _setup_return_values {
+    my @return = split /\n/s , $_[0];
 
     # XXX
     my $prototyped = shift @return;
@@ -181,6 +201,7 @@ sub     '.$sub_name.'      {
         my $strlen = shift @return;
         if ( $strlen == -1 )
         {
+            # a length of "-1" means "undef"
             push @ret, undef;
             shift @return;
             next;
@@ -190,8 +211,6 @@ sub     '.$sub_name.'      {
         while ( length( $str ) < $strlen )
         {
             $str .= "\n";
-            #last unless @return;
-            #next unless length( $str ) < $strlen ;
             my $s = shift @return;
             $str .= $s if defined $s;
         }
@@ -202,16 +221,6 @@ sub     '.$sub_name.'      {
     # warn "end parrot sub '.$sub_name.' \n";
     return $return[0] unless $#return;
     return @return;
-}
-    ';
-
-        # warn "Cmd [ $perl_accessor ]\n";
-        eval $perl_accessor;
-        croak "Unable to load Parrot module $sub_name:\n$@" if $@;
-    }
-}
-
-sub info {
 }
 
 sub _setup_parrot_parameters {
@@ -251,15 +260,31 @@ sub _setup_parrot_parameters {
         my $val = $_[$_];
         if ( $def )
         {
-            $param .= "  .local $def->{type} $def->{name}\n";
-            $param .= "  read \$S12, ". length($val) ."\n";
-            $param .= "  set $def->{name}, \$S12\n";
-            $value .= $val;
+            if ( defined $val )
+            {
+                $param .= "  .local $def->{type} $def->{name}\n";
+                $param .= "  read \$S12, ". length($val) ."\n";
+                $param .= "  set $def->{name}, \$S12\n";
+                $value .= $val;
+            }
+            else
+            {
+                $param .= "  .local pmc $def->{name}\n";
+                $param .= "  null $def->{name}\n";
+            }
         }
         else
         {
-            $param .= "  .local string var$_\n" . 
-                      "  set  var$_, \"$val\"\n";
+            if ( defined $val )
+            {
+                $param .= "  .local string var$_\n" . 
+                          "  set  var$_, \"$val\"\n";
+            }
+            else
+            {
+                $param .= "  .local pmc var$_\n";
+                $param .= "  null var$_\n";
+            }
         }
     }
 

@@ -1,12 +1,17 @@
 TODO list for Perl extension Inline::Parrot.
 
+- rewrite the tests - bring the parrot code nearer to the tests
+  for readability
+
 - add tests for the preprocessor: '.include' and '.macro' statements
 - does Parrot know about 'wantarray' ?
 
 - Test mixing I::Parrot with Inline::C
   XS version of I::Parrot ?
 
-- use other pipes instead of STDIN/STDOUT/STDERR
+- use I::Parrot to implement the languages supported by Parrot
+
+- use other handles instead of STDIN/STDOUT/STDERR
 - set up an exception handler to get the error messages into STDOUT
 - Test what happens if STDIN is read by Parrot
 - "Division by zero" error is not showing up
@@ -16,18 +21,20 @@ TODO list for Perl extension Inline::Parrot.
 - Test Parrot global variables
 - Test for namespace problems
 - Test for Parrot calling subroutines in different code snippets.
+- implement callbacks
+- implement objects
 
+- parse the signature for the return values
+  returned values are currently unordered
 - test for different encodings
 - test prototyped/non-prototyped parameters/return values
 - allow "undef" parameters:  
   - returning "null" is ok; add tests for "PerlUndef"
-  - accept "null" as input.
+  - accept "null" as input. -- why this doesn't work ???
 - it doesn't pass data structures back and forth.
   you can't pass a data structure by reference - this is not 
   likely to be fixable, because the perl and the parrot processes
   don't share memory. But this can be emulated (slow).
-- parse the signature for the return values
-  returned values are currently unordered
 - use "freeze/thaw", Data::Dumper, or Storable to pass structures
 
 - Test what happens with Perl when Parrot sleep's, and vice-versa
