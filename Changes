@@ -1,0 +1,40 @@
+Revision history for Perl extension Inline::Parrot.
+
+0.08  2004-10-13
+
+- Makefile.PL asks for the location of "parrot"
+- the parrot interpreter is a separate file
+- get_interpreter_code() returns a filename, instead of the code itself
+
+0.07  2004-10-12
+
+- prototyped parameters
+
+0.06  2004-10-10
+
+- "@_" is passed in registers S5 .. S15; param count goes in I2
+- returns S5 .. S15
+- allows for multiple subs in a single chunk of code
+
+0.05  2004-10-09
+
+- some Windows warnings fixed
+
+0.04  2004-10-08
+
+- switch to "Parrot calling convention" - ".pcc_sub"
+- "@_" parameters are passed on P5 as a .PerlArray
+
+0.03  2004-10-08
+
+- uses a single Parrot process
+
+0.02  2004-10-08
+
+- created by h2xs 1.23 with options
+    -A -B -X -d -n Inline::Parrot --skip-exporter --skip-autoloader -b 5.5.3
+            
+0.01  2004-10-06
+
+- see http://www.perlmonks.org/?node_id=396890
+

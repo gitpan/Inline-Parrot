@@ -1,0 +1,46 @@
+TODO list for Perl extension Inline::Parrot.
+
+- how to create a signature for the return values?
+- subs without signature should use PMC, instead of string
+- use "freeze/thaw"
+
+- process .include
+
+- mixing I::Parrot with Inline::C
+- XS version of I::Parrot
+
+- send Win32 stderr to a temp file, using "2>temp" syntax
+unless it is Win95.
+- use other pipes instead of STDIN/STDOUT/STDERR
+- set up an exception handler to get the error messages into STDOUT
+
+- The parrot subroutines should be created under the same namespace as 
+the current Perl module
+- Test Parrot global variables
+- Test for namespace problems
+
+- Pass parameters to Parrot 
+- see pdd03 - calling conventions
+- see imcc/t/imcpasm/pcc.t
+
+- strings passed to/from Parrot must be escaped for "\n", etc. 
+- test for different encodings
+- parameters are passed on P5 through P15, and then in P3 as a 
+.PerlArray (simple values only)
+- process overflow parameters / return values
+- prototypes
+- test non-prototyped parameters /return values
+- it doesn't pass data structures back and forth.
+- you can't pass a data structure by reference - this is not 
+likely to be fixable, because the perl and the parrot processes
+don't share memory. But this can be emulated (slow).
+
+- Documentation
+
+- Test what happens if STDIN is read by Parrot
+
+- Test what happens with Perl when Parrot sleep's, and vice-versa
+- Perl may give Parrot a timeout, if Parrot make a sleep.
+
+- Test with Perl threads
+

@@ -1,0 +1,20 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+TODO
+
+lib/Inline/Parrot.pm
+lib/Inline/Parrot/parrot.pm
+lib/Inline/Parrot/parrot-interp.pir
+
+t/01-Inline-Parrot-parrot.t
+t/02-Inline-Parrot.t
+t/03-crash-parrot.t
+t/04-args.t
+t/05-return.t
+t/06-prototype.t
+
+MANIFEST.SKIP
+META.yml                                 Module meta-data (added by MakeMaker)
+
